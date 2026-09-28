@@ -1,0 +1,14 @@
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { REGISTERED_USERS, SITE } from './config.mjs';
+const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+if (!Number.isInteger(REGISTERED_USERS) || REGISTERED_USERS < 0) throw new Error('Invalid registered users count');
+if (SITE.domain && !/^https:\/\/[^/]+$/.test(SITE.domain)) throw new Error('Set domain to an HTTPS origin without a trailing slash.');
+const schema = {'@context':'https://schema.org','@type':'WebSite',name:'UniMarkaz',description:SITE.description,inLanguage:'en',...(SITE.domain ? {url:SITE.domain+'/'} : {})};
+const values = {TITLE:SITE.title,DESCRIPTION:SITE.description,COUNT:REGISTERED_USERS,ENDPOINT:SITE.formEndpoint,FORM_KEY:SITE.formAccessKey,ROBOTS:SITE.domain?'index, follow, max-image-preview:large':'noindex, follow'};
+let html = readFileSync('src/index.html','utf8').replace(/\{\{(\w+)\}\}/g,(match,key)=>key in values?escape(values[key]):match);
+html = html.replace('{{CANONICAL}}',SITE.domain?`<link rel="canonical" href="${escape(SITE.domain)}/"><meta property="og:url" content="${escape(SITE.domain)}/">`:'').replace('{{SCHEMA}}',JSON.stringify(schema).replace(/</g,'\\u003c'));
+mkdirSync('dist',{recursive:true});
+writeFileSync('dist/index.html',html);
+writeFileSync('dist/robots.txt',SITE.domain?`User-agent: *\nAllow: /\nSitemap: ${SITE.domain}/sitemap.xml\n`:'User-agent: *\nAllow: /\n');
+writeFileSync('dist/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${SITE.domain?`<url><loc>${escape(SITE.domain)}/</loc></url>`:''}</urlset>`);
+console.log('Built UniMarkaz. Search indexing: '+(SITE.domain?'enabled':'disabled until domain is configured'));
