@@ -51,6 +51,8 @@ mkdirSync(dist, { recursive: true });
 writeFileSync(path.join(dist, 'index.html'), html);
 const stylesheet = path.join(root, 'src', 'style.css');
 if (existsSync(stylesheet)) copyFileSync(stylesheet, path.join(dist, 'style.css'));
+const appJs = path.join(root, 'src', 'app.js');
+if (existsSync(appJs)) copyFileSync(appJs, path.join(dist, 'app.js'));
 writeFileSync(path.join(dist, 'robots.txt'), `User-agent: *\nAllow: /\n${SITE.domain ? `Sitemap: ${SITE.domain}/sitemap.xml\n` : ''}`);
 writeFileSync(path.join(dist, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${canonicalUrl ? `\n  <url><loc>${escape(canonicalUrl)}</loc></url>\n` : ''}</urlset>\n`);
 console.log(`Built UniMarkaz in ${dist}. Search indexing: ${SITE.domain ? 'enabled' : 'disabled until domain is configured'}.`);
