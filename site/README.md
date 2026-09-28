@@ -1,32 +1,53 @@
-# UniMarkaz — coming soon
+# UniMarkaz — earn while you study
 
-A complete, responsive student marketplace anticipation page with original blue/lime branding, animated campus cards, local fonts, and a compact email waitlist.
+A responsive waitlist landing page for Pakistan’s university student marketplace. The page leads with earning from student skills, explains what is coming, and makes joining the free waitlist the primary action. Its cream, violet, tangerine and lime visual system includes an interactive skills preview, early-access invitation, and a matching social share image.
 
-## Run and deploy
+## Build and preview
 
-Requires Node.js; no dependency installation.
+Requires Node.js 18+; no dependency installation for building or serving.
+
+From the repository root:
+
+```sh
+node site/build.mjs
+node site/serve.mjs
+```
+
+Or from `site/`:
 
 ```sh
 node build.mjs
 node serve.mjs
 ```
 
-Preview at http://127.0.0.1:4173. Deploy `dist` to your HTTPS static host for **unimarkaz.com**. The custom domain is configured in metadata; this does not configure DNS or publish the site.
+Open http://127.0.0.1:4173. `PORT` can override the preview port. The local server sends an `X-Robots-Tag: noindex` header and is for development only. Deploy the complete `site/dist/` directory to the HTTPS static host for **unimarkaz.com**. Updating this repository does not publish the site or configure DNS.
 
-## Configuration
+## Editing
 
-- `config.mjs`: the single `REGISTERED_USERS = 100` variable controls the hardcoded mock counter. It never fetches real signups or increments after a submission.
-- `config.mjs`: final domain, title, description, and public SplitForms form key. Never use an account API token in frontend code. Confirm that the supplied key is active and its allowed-domain settings include unimarkaz.com.
-- `src/index.html`: all copy and markup. Product scope includes tutoring, project collaboration, bike pooling, skills, services and other campus connections, across universities. No payments or transactions are handled.
-- `dist/style.css`: responsive styling, animation, motion pause, reduced-motion preferences, keyboard focus and forced-colors support.
-- `dist/app.js`: email submission, input validation, duplicate-submit prevention, timeout, retry and rate-limit messages. Success appears only after the backend confirms `success: true`. Comments identify an optional analytics hook; no analytics, cookies, local storage or personal-data logging are installed.
+- `config.mjs`: canonical domain, search title, description, form endpoint, public SplitForms access key and `REGISTERED_USERS`. The count is manually configured at **100**; it is not fetched from the provider and does not change after a browser submission. Keep it aligned with the verified waitlist total.
+- `src/index.html`: all landing-page copy, semantic markup, form controls, FAQ and privacy explanation.
+- `src/style.css`: responsive layout, colors, focus states and motion preferences. The build copies it into `dist/style.css`.
+- `dist/app.js`: interactive opportunity previews, waitlist links, motion controls and signup handling. This file is served directly and is not overwritten by the build.
+- `dist/assets/`: locally served font and its license, imagery, and `social-card.png` (1200 × 630). The matching SVG is the editable source for the social artwork. Keep the PNG dimensions and build metadata in sync when replacing it.
 
-The form only asks for an email and one interest: offering, looking, or both. Launch-email purpose is stated alongside the form. Set up your unsubscribe/reply handling before sending launch emails. Development checks use mocked responses and do not send real signup emails. Confirm delivery with your own test email before public launch.
+Run the build after changes to configuration, markup or source CSS. The build rejects invalid count/domain values and unknown template placeholders. Assets and JavaScript currently live directly in `dist/`; do not clear that directory before building.
 
-## SEO and performance
+## Waitlist behavior
 
-The build outputs semantic static HTML, canonical and Open Graph URLs for https://unimarkaz.com/, searchable title and description, WebSite JSON-LD, a robots file and sitemap. It uses descriptive campus-marketplace copy, one H1, native FAQ disclosures, a local variable font with its OFL license, a compressed 68 KB WebP with reserved dimensions, and deferred JavaScript. No framework runtime or external font requests. Configure compression and caching on the host and submit the sitemap to Search Console after deployment.
+The form asks for an email and one interest: earning, finding help, or both. The existing SplitForms endpoint and public form access key are preserved. Success is shown only after the provider confirms `success: true`; validation, duplicate submissions, timeouts, retry messages and rate limits are handled. There are no analytics, cookies, local-storage identifiers or personal-data logs in the page.
 
-The campus image is generated illustrative imagery, not a testimonial. Social preview artwork is omitted until requested. No launch date, false scarcity, campus partnerships or guaranteed services are claimed. Features may evolve.
+Before public launch, confirm the form key is active, the production domain is permitted by the provider, and a test signup using an address you control is received. Automated checks use intercepted responses and must not add real subscribers. Set up the reply/unsubscribe workflow described in the privacy copy before emailing subscribers.
 
-References: [Google search guidance](https://developers.google.com/search/docs/fundamentals/get-started-developers), [WebSite structured data](https://developers.google.com/search/docs/appearance/site-names), [SplitForms integration](https://splitforms.com/docs).
+## Search and sharing
+
+The generated static HTML includes a descriptive search title and description, canonical URL, WebSite JSON-LD with the UniMarkaz site name, Open Graph metadata, a large Twitter/X preview image, `robots.txt` and a single-page sitemap. Set `SITE.domain` to an empty string for a published staging build that should carry a `noindex` meta tag; rebuild before deployment. Production currently targets `https://unimarkaz.com/`.
+
+Search content is available in the initial HTML. The page uses one H1, descriptive sections, local fonts, a compressed campus WebP with reserved dimensions, and deferred JavaScript. The campus artwork is illustrative. The page makes no fixed launch-date, university-partnership or earnings-guarantee claims. Features can evolve during development.
+
+On the production host, redirect HTTP and alternate hostnames to the canonical HTTPS domain, enable compression and asset caching, and keep the page accessible to crawlers. Verify the property in Google Search Console and submit `https://unimarkaz.com/sitemap.xml` after deployment. Metadata and a sitemap help search engines understand and discover the page; they do not guarantee rankings or indexing.
+
+Google references: [descriptive titles](https://developers.google.com/search/docs/appearance/title-link), [site name structured data](https://developers.google.com/search/docs/appearance/site-names), [canonical URLs](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls), [sitemap guidance](https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview).
+
+## Verification
+
+`verify.cjs` exercises the page in a browser, including viewport layouts, accessibility-related interactions, metadata, local assets and mocked waitlist outcomes. It uses Playwright from the available environment; it is a development check and is not required to serve the static page. Inspect its environment settings when running outside this workspace.
