@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync, cpSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { REGISTERED_USERS, SITE } from './config.mjs';
@@ -36,7 +36,7 @@ const textValues = {
 };
 const markupValues = {
   CANONICAL: canonicalUrl ? `<link rel="canonical" href="${escape(canonicalUrl)}"><meta property="og:url" content="${escape(canonicalUrl)}">` : '',
-  SOCIAL_META: imageUrl ? `<meta property="og:image" content="${escape(imageUrl)}"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="UniMarkaz — Make money. Make moves. Between classes. Join the free waitlist."><meta property="og:locale" content="en_PK"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${escape(imageUrl)}"><meta name="twitter:image:alt" content="UniMarkaz — Earn while you study. Join the free waitlist.">` : '<meta name="twitter:card" content="summary">',
+  SOCIAL_META: imageUrl ? `<meta property="og:image" content="${escape(imageUrl)}"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="unimarkaz — Your campus. Your next big thing. Join the early crew."><meta property="og:locale" content="en_PK"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${escape(imageUrl)}"><meta name="twitter:image:alt" content="unimarkaz — Your campus. Your next big thing. Join the early crew.">` : '<meta name="twitter:card" content="summary">',
   SCHEMA: JSON.stringify(schema).replace(/</g, '\\u003c'),
 };
 
@@ -50,9 +50,11 @@ const html = template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
 mkdirSync(dist, { recursive: true });
 writeFileSync(path.join(dist, 'index.html'), html);
 const stylesheet = path.join(root, 'src', 'style.css');
-if (existsSync(stylesheet)) copyFileSync(stylesheet, path.join(dist, 'style.css'));
+copyFileSync(stylesheet, path.join(dist, 'style.css'));
 const appJs = path.join(root, 'src', 'app.js');
-if (existsSync(appJs)) copyFileSync(appJs, path.join(dist, 'app.js'));
+copyFileSync(appJs, path.join(dist, 'app.js'));
+// Source assets live outside generated output so a clean checkout builds completely.
+cpSync(path.join(root, 'assets'), path.join(dist, 'assets'), { recursive: true });
 writeFileSync(path.join(dist, 'robots.txt'), `User-agent: *\nAllow: /\n${SITE.domain ? `Sitemap: ${SITE.domain}/sitemap.xml\n` : ''}`);
 writeFileSync(path.join(dist, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${canonicalUrl ? `\n  <url><loc>${escape(canonicalUrl)}</loc></url>\n` : ''}</urlset>\n`);
 console.log(`Built UniMarkaz in ${dist}. Search indexing: ${SITE.domain ? 'enabled' : 'disabled until domain is configured'}.`);

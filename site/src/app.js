@@ -7,10 +7,87 @@ const submitButton = form.querySelector('button[type="submit"]');
 const submitLabel = submitButton.firstElementChild;
 const defaultSubmitLabel = submitLabel.textContent;
 const waitlist = document.querySelector('#waitlist');
+const signupIntro = document.querySelector('#signup-intro');
+const referralLink = document.querySelector('#referral-link');
+const copyLink = document.querySelector('#copy-link');
+const shareWhatsapp = document.querySelector('#share-whatsapp');
+const nativeShare = document.querySelector('#native-share');
+const shareStatus = document.querySelector('#share-status');
+const referralNote = document.querySelector('#referral-note');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let submitting = false;
+let confirmedShareUrl = '';
+
+// Codes contain no email or personal information. They are sent to the form
+// provider so confirmed signups can be matched to the person who invited them.
+const validReferralCode = value => typeof value === 'string' && /^[A-Za-z0-9_-]{12,40}$/.test(value);
+const incomingCode = new URLSearchParams(location.search).get('ref');
+const referredBy = validReferralCode(incomingCode) ? incomingCode : '';
+function createReferralCode() {
+  if (typeof globalThis.crypto?.randomUUID === 'function') return crypto.randomUUID().replace(/-/g, '');
+  if (typeof globalThis.crypto?.getRandomValues === 'function') {
+    return Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+  // Signup still works in an older browser without secure random generation.
+  return '';
+}
+let referralCode = createReferralCode();
+
+function setReferralFields() {
+  form.elements.referral_code.value = referralCode;
+  form.elements.referred_by.value = referredBy === referralCode ? '' : referredBy;
+}
+setReferralFields();
+if (referralNote) referralNote.hidden = !form.elements.referred_by.value;
 
 form.elements.form_loaded_at.value = String(Date.now());
+
+function revealShareOptions() {
+  const canonical = document.querySelector('link[rel="canonical"]');
+  const url = new URL(canonical?.href || location.origin);
+  url.search = '';
+  url.hash = '';
+  if (referralCode) url.searchParams.set('ref', referralCode);
+  confirmedShareUrl = url.href;
+  if (referralLink) referralLink.value = confirmedShareUrl;
+  if (copyLink) copyLink.querySelector('span').textContent = 'Copy link';
+  if (shareStatus) shareStatus.textContent = '';
+  if (shareWhatsapp) {
+    shareWhatsapp.href = `https://wa.me/?text=${encodeURIComponent(`Your campus group needs this. 👀 unimarkaz is a student marketplace launching soon. Get on the list: ${confirmedShareUrl}`)}`;
+  }
+  if (nativeShare) nativeShare.hidden = typeof navigator.share !== 'function';
+  if (shareStatus && !referralCode) {
+    shareStatus.textContent = 'Share this page with your campus group. Personal invite links need a newer browser.';
+  }
+}
+
+copyLink?.addEventListener('click', async () => {
+  if (!confirmedShareUrl) return;
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+    await navigator.clipboard.writeText(confirmedShareUrl);
+    copyLink.querySelector('span').textContent = 'Copied!';
+    if (shareStatus) shareStatus.textContent = 'Link copied. Your campus group is waiting.';
+  } catch {
+    referralLink?.focus();
+    referralLink?.select();
+    if (shareStatus) shareStatus.textContent = 'Your link is selected. Press and hold it, or use Ctrl+C / ⌘C to copy.';
+  }
+});
+
+nativeShare?.addEventListener('click', async () => {
+  if (!confirmedShareUrl || typeof navigator.share !== 'function') return;
+  if (shareStatus) shareStatus.textContent = '';
+  try {
+    await navigator.share({
+      title: 'unimarkaz — your campus is about to get interesting',
+      text: 'A student marketplace is coming. Get on the list with me. 👀',
+      url: confirmedShareUrl
+    });
+  } catch (error) {
+    if (error.name !== 'AbortError' && shareStatus) shareStatus.textContent = 'Couldn’t open sharing. You can copy your invite link instead.';
+  }
+});
 
 function selectInterest(interest) {
   if (!['offer', 'find', 'both'].includes(interest)) throw new Error('Invalid interest');
@@ -67,45 +144,6 @@ if (motionToggle) {
   });
 }
 
-const skills = {
-  tutoring: {
-    icon: 'Aa', tag: 'KNOW IT. TEACH IT.', title: 'Explain it once. Earn from it.',
-    description: 'The subject you’ve got down could be the one someone else is stuck on. Offer tutoring around your own timetable.',
-    examples: 'Subject tutoring · Exam prep · Study sessions'
-  },
-  design: {
-    icon: '✳', tag: 'CREATE IT. PUT IT OUT THERE.', title: 'Your creative streak has a market.',
-    description: 'From society posters to a new venture’s identity, students have ideas that need a creative eye. Yours could be just the one.',
-    examples: 'Posters · Presentations · Club branding'
-  },
-  code: {
-    icon: '</>', tag: 'BUILD IT. MAKE IT USEFUL.', title: 'Build beyond your coursework.',
-    description: 'Turn your technical know-how into something useful. Build a simple site or help another student understand the code.',
-    examples: 'Simple websites · Coding lessons · Portfolio help'
-  },
-  photo: {
-    icon: '◎', tag: 'FRAME IT. SHARE YOUR TALENT.', title: 'Your lens. A campus side gig.',
-    description: 'Graduation days, society events, a student’s new venture. Help people capture the moments and ideas that matter to them.',
-    examples: 'Graduation portraits · Society events · Product photos'
-  }
-};
-
-const skillPreview = document.querySelector('#skill-preview');
-const skillButtons = document.querySelectorAll('[data-skill]');
-skillButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    const category = button.dataset.skill;
-    if (!Object.hasOwn(skills, category) || !skillPreview) return;
-    const skill = skills[category];
-    skillButtons.forEach(choice => choice.setAttribute('aria-pressed', String(choice === button)));
-    for (const key of ['icon', 'tag', 'title', 'description', 'examples']) {
-      const element = document.querySelector('#skill-' + key);
-      if (element) element.textContent = skill[key];
-    }
-    skillPreview.dataset.category = category;
-  });
-});
-
 // Keep the mobile invitation out of the way when a signup invitation is already in view.
 const mobileCta = document.querySelector('.mobile-cta');
 let waitlistVisible = true;
@@ -148,7 +186,11 @@ form.addEventListener('submit', async event => {
   try {
     const data = new FormData(form);
     data.set('email', form.elements.email.value);
-    data.set('message', `UniMarkaz beta waitlist. Interest: ${data.get('interest')}. Requested beta testing opportunities and launch email updates.`);
+    // Plain-text copies keep referral attribution available in email/CSV exports
+    // even if the form provider does not expose extra fields as separate columns.
+    data.set('referral_code', referralCode);
+    data.set('referred_by', form.elements.referred_by.value);
+    data.set('message', `unimarkaz early-access waitlist. Interest: ${data.get('interest')}. Requested early access and launch email updates.\nreferral_code: ${referralCode}\nreferred_by: ${form.elements.referred_by.value}`);
     const response = await fetch(form.action, {
       method: 'POST', body: data, headers: {Accept: 'application/json'}, signal: controller.signal
     });
@@ -159,10 +201,13 @@ form.addEventListener('submit', async event => {
       throw error;
     }
     form.hidden = true;
+    if (signupIntro) signupIntro.hidden = true;
+    if (referralNote) referralNote.hidden = true;
     success.hidden = false;
+    revealShareOptions();
     updateMobileCta();
     success.focus({preventScroll: true});
-    // No analytics or personal information is stored in this browser.
+    // No signup details or referral codes are stored in this browser.
   } catch (error) {
     status.textContent = error.name === 'AbortError'
       ? 'We couldn’t confirm your signup in time. Your email is still here — please try again shortly.'
@@ -182,10 +227,15 @@ form.addEventListener('submit', async event => {
 document.querySelector('#another-signup')?.addEventListener('click', () => {
   if (submitting) return;
   form.reset();
+  referralCode = createReferralCode();
+  setReferralFields();
+  confirmedShareUrl = '';
   form.elements.form_loaded_at.value = String(Date.now());
   status.textContent = '';
   success.hidden = true;
   form.hidden = false;
+  if (signupIntro) signupIntro.hidden = false;
+  if (referralNote) referralNote.hidden = !form.elements.referred_by.value;
   updateMobileCta();
   form.elements.email.focus({preventScroll: true});
 });
@@ -196,7 +246,7 @@ if (document.modelContext?.registerTool) {
   const tool = {
     name: 'prepare_unimarkaz_waitlist',
     title: 'Prepare UniMarkaz waitlist signup',
-    description: 'Select an interest and fill the email field for review. Does not submit the form or sign anyone up.',
+    description: 'Prepare an email and interest for a UniMarkaz waitlist signup. Interest is a hidden form value. Does not submit the form or sign anyone up.',
     inputSchema: {type: 'object', properties: {interest: {type: 'string', enum: ['offer', 'find', 'both']}, email: {type: 'string', maxLength: 254}}, required: ['interest'], additionalProperties: false},
     annotations: {readOnlyHint: false, untrustedContentHint: false},
     execute(input) {
