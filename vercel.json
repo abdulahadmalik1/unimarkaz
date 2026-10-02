@@ -5,12 +5,7 @@
   "installCommand": "echo 'no install needed'",
   "framework": null,
   "redirects": [
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.unimarkaz.com" }],
-      "destination": "https://unimarkaz.com/:path*",
-      "permanent": true
-    },
+
     {
       "source": "/",
       "destination": "/early-access/",
