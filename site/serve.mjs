@@ -29,7 +29,15 @@ const server = http.createServer(async (req, res) => {
     try { pathname = decodeURIComponent(url.pathname); } catch {
       res.writeHead(400); res.end('Bad request'); return;
     }
-    const file = path.resolve(root, `.${pathname === '/' ? '/index.html' : pathname}`);
+    // Redirect root to the waitlist subpage, mirroring production routing.
+    if (pathname === '/' || pathname === '/index.html') {
+      res.writeHead(302, { Location: '/early-access/' });
+      res.end();
+      return;
+    }
+    // Serve directory index files (e.g. /early-access/ → /early-access/index.html)
+    const trailingSlash = pathname.endsWith('/');
+    const file = path.resolve(root, `.${trailingSlash ? pathname + 'index.html' : pathname}`);
     const relative = path.relative(root, file);
     if (relative.startsWith('..') || path.isAbsolute(relative) || pathname.includes('\0')) {
       res.writeHead(403); res.end('Forbidden'); return;

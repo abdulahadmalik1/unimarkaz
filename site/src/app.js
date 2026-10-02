@@ -4,6 +4,7 @@ const form = document.querySelector('#waitlist-form');
 const status = document.querySelector('#form-status');
 const success = document.querySelector('#success');
 const submitButton = form.querySelector('button[type="submit"]');
+const emailInput = form.elements.email;
 const submitLabel = submitButton.firstElementChild;
 const defaultSubmitLabel = submitLabel.textContent;
 const waitlist = document.querySelector('#waitlist');
@@ -117,21 +118,6 @@ document.querySelectorAll('a[href="#privacy"]').forEach(link => {
   });
 });
 
-// The displayed count comes from config.mjs. It is never fetched or incremented on signup.
-const counter = document.querySelector('[data-count]');
-if (counter && !reducedMotion.matches) {
-  const target = Number(counter.dataset.count);
-  if (Number.isFinite(target) && target >= 0) {
-    const start = performance.now();
-    const animate = now => {
-      const progress = Math.min(Math.max((now - start) / 1100, 0), 1);
-      counter.textContent = String(Math.round(target * (1 - Math.pow(1 - progress, 3))));
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
-  }
-}
-
 const motionToggle = document.querySelector('#motion-toggle');
 if (motionToggle) {
   // Motion is already disabled in CSS for this preference; no inactive control is needed.
@@ -176,6 +162,10 @@ form.addEventListener('submit', async event => {
   // Pasted email addresses often include whitespace. Normalize before native validation.
   form.elements.email.value = form.elements.email.value.trim();
   if (!form.reportValidity()) return;
+  // Keep the displayed email aligned with the request while it is in flight.
+  // Read-only inputs remain part of FormData and can still be selected or copied.
+  const emailWasReadOnly = emailInput.readOnly;
+  emailInput.readOnly = true;
   submitting = true;
   submitButton.disabled = true;
   submitLabel.textContent = 'Joining…';
@@ -218,6 +208,7 @@ form.addEventListener('submit', async event => {
   } finally {
     clearTimeout(timeout);
     submitting = false;
+    emailInput.readOnly = emailWasReadOnly;
     submitButton.disabled = false;
     submitLabel.textContent = defaultSubmitLabel;
     form.removeAttribute('aria-busy');

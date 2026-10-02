@@ -13,7 +13,7 @@ const attrs = tag => Object.fromEntries([...tag.matchAll(/([\w-]+)="([^"]*)"/g)]
 const metas = [...html.matchAll(/<meta\b[^>]*>/g)].map(([tag]) => attrs(tag));
 const meta = key => metas.find(item => item.name === key || item.property === key)?.content;
 
-function verifyOutput(SITE, REGISTERED_USERS) {
+function verifyOutput(SITE) {
   assert.equal((html.match(/<h1\b/g) || []).length, 1, 'One primary heading');
   assert(!/\{\{\w+\}\}/.test(html), 'All build tokens resolve');
   assert.equal(decode(html.match(/<title>(.*?)<\/title>/s)[1]), SITE.title);
@@ -23,6 +23,10 @@ function verifyOutput(SITE, REGISTERED_USERS) {
   assert.equal(canonical.href, `${SITE.domain}/`);
   assert.equal(meta('og:url'), canonical.href);
   assert.equal(meta('og:type'), 'website');
+  assert.equal(meta('og:title'), SITE.title);
+  assert.equal(meta('twitter:title'), SITE.title);
+  assert.equal(meta('og:description'), SITE.description);
+  assert.equal(meta('twitter:description'), SITE.description);
   for (const key of ['og:title', 'og:description', 'og:image', 'og:image:alt', 'twitter:title', 'twitter:description', 'twitter:image', 'twitter:card']) assert(meta(key), `Missing ${key}`);
   assert.equal(meta('twitter:card'), 'summary_large_image');
   const schemas = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].flatMap(([, json]) => {
@@ -32,6 +36,16 @@ function verifyOutput(SITE, REGISTERED_USERS) {
   assert(website, 'WebSite structured data is present');
   assert.equal(website.url, canonical.href);
   assert.match(website.name, /^unimarkaz$/i);
+  assert.equal(website.inLanguage, 'en-PK');
+  const organization = schemas.find(schema => schema['@type'] === 'Organization');
+  const webpage = schemas.find(schema => schema['@type'] === 'WebPage');
+  assert(organization, 'Organization structured data is present');
+  assert(webpage, 'WebPage structured data is present');
+  assert.equal(organization.areaServed?.['@type'], 'Country');
+  assert.equal(organization.areaServed?.name, 'Pakistan');
+  assert.equal(webpage.inLanguage, 'en-PK');
+  assert.equal(webpage.isPartOf?.['@id'], website['@id']);
+  assert.equal(webpage.about?.['@id'], organization['@id']);
   assert(fs.readFileSync(path.join(dist, 'sitemap.xml'), 'utf8').includes(canonical.href));
   assert(fs.readFileSync(path.join(dist, 'robots.txt'), 'utf8').includes(`Sitemap: ${SITE.domain}/sitemap.xml`));
   const checkAsset = value => {
@@ -47,6 +61,10 @@ function verifyOutput(SITE, REGISTERED_USERS) {
   for (const [, target] of html.matchAll(/href="#([^" ]+)"/g)) assert(ids.includes(target), `Missing anchor ${target}`);
   assert(!html.includes('name="name"') && !html.includes('name="campus"'), 'Compact signup');
   const signup = attrs(html.match(/<form\b[^>]*id="waitlist-form"[^>]*>/)[0]);
+  const formContent = html.match(/<form\b[^>]*id="waitlist-form"[^>]*>([\s\S]*?)<\/form>/)[1];
+  const formInputs = [...formContent.matchAll(/<input\b[^>]*>/g)].map(([tag]) => attrs(tag));
+  assert.deepEqual(formInputs.filter(input => input.type !== 'hidden' && input['aria-hidden'] !== 'true').map(input => input.name), ['email'], 'Email is the only visible signup field');
+  assert(!/<(?:select|textarea)\b/.test(formContent), 'No extra signup questions');
   assert.equal(signup.action, SITE.formEndpoint);
   assert.equal(signup.method.toLowerCase(), 'post', 'Native form remains usable without JavaScript');
   const inputs = [...html.matchAll(/<input\b[^>]*>/g)].map(([tag]) => attrs(tag));
@@ -59,6 +77,14 @@ function verifyOutput(SITE, REGISTERED_USERS) {
   assert.equal(email?.type, 'email');
   assert.equal(email.id, 'email');
   assert.equal(email.autocomplete, 'email');
+  assert.equal(email.autocapitalize, 'none');
+  assert.equal(email.spellcheck, 'false');
+  assert.equal(email.inputmode, 'email');
+  assert.equal(email.maxlength, '254');
+  assert(email['aria-describedby'].split(/\s+/).includes('form-status'), 'Email is associated with submission feedback');
+  assert(/<label\b[^>]*for="email"[^>]*>[^<]+<\/label>/.test(formContent), 'Email has a text label');
+  assert(/<input\b[^>]*id="email"[^>]*\brequired\b/.test(formContent), 'Email is required without JavaScript');
+  assert(/<[^>]*id="form-status"[^>]*aria-live="polite"[^>]*tabindex="-1"/.test(formContent), 'Submission feedback is announced and can receive focus');
   assert.equal(inputs.find(input => input.name === 'access_key')?.value, SITE.formAccessKey);
   for (const name of ['referral_code', 'referred_by', 'form_loaded_at', 'subject']) {
     assert.equal(inputs.find(input => input.name === name)?.type, 'hidden', `${name} is sent without adding form friction`);
@@ -70,11 +96,7 @@ function verifyOutput(SITE, REGISTERED_USERS) {
   assert(/<[^>]*id="success"[^>]*\bhidden\b/.test(html), 'No success state before confirmation');
   assert(/<[^>]*id="share-status"[^>]*aria-live="polite"/.test(html), 'Share feedback is announced');
   assert(!/localStorage|sessionStorage/.test(js), 'Signup details are not saved in browser storage');
-  const counts = [...html.matchAll(/data-count="(\d+)"[^>]*>(\d+)</g)];
-  assert.equal(counts.length, 1, 'One prominent count');
-  assert.equal(Number(counts[0][1]), REGISTERED_USERS);
-  assert.equal(Number(counts[0][2]), REGISTERED_USERS, 'Configured count is visible in initial HTML');
-  assert.equal(REGISTERED_USERS, 100, 'Preserve requested count');
+  assert(!html.includes('data-count='), 'No unverified signup count');
 }
 
 class Element {
@@ -97,12 +119,11 @@ class Element {
   dispatch(event, detail = {}) { return this.handlers[event]?.({preventDefault(){},currentTarget:this,target:this,...detail}); }
 }
 
-function createHarness(SITE, REGISTERED_USERS, options = {}) {
+function createHarness(SITE, options = {}) {
   const defaultLabel = decode(html.match(/<button\b[^>]*type="submit"[^>]*>\s*<[^>]+>([^<]+)/)[1]);
   const button = new Element({disabled:false,firstElementChild:new Element({textContent:defaultLabel})});
   const status = new Element(), success = new Element({hidden:true});
-  const counter = new Element({textContent:String(REGISTERED_USERS),dataset:{count:String(REGISTERED_USERS)}});
-  const form = new Element({valid:true,action:SITE.formEndpoint,elements:{form_loaded_at:{value:''},botcheck:{value:''},email:new Element({value:'test@example.com'}),interest:new Element({type:'hidden',value:'both'}),referral_code:new Element({value:''}),referred_by:new Element({value:''})},querySelector:() => button,reportValidity(){return this.valid;},reset(){this.elements.email.value='';this.elements.botcheck.value='';this.elements.interest.value='both';this.elements.referral_code.value='';this.elements.referred_by.value='';}});
+  const form = new Element({valid:true,action:SITE.formEndpoint,elements:{form_loaded_at:{value:''},botcheck:{value:''},email:new Element({value:'test@example.com',readOnly:false}),interest:new Element({type:'hidden',value:'both'}),referral_code:new Element({value:''}),referred_by:new Element({value:''})},querySelector:() => button,reportValidity(){return this.valid;},reset(){this.elements.email.value='';this.elements.botcheck.value='';this.elements.interest.value='both';this.elements.referral_code.value='';this.elements.referred_by.value='';}});
   const signupLinks = [...html.matchAll(/<a\b[^>]*href="#waitlist"[^>]*>/g)].map(([tag]) => {
     const intent = attrs(tag)['data-intent'];
     return new Element({dataset:intent ? {intent} : {}});
@@ -111,7 +132,7 @@ function createHarness(SITE, REGISTERED_USERS, options = {}) {
   const another = new Element(), waitlist = new Element(), mobile = new Element({hidden:true}), body = new Element(), privacyLink = new Element();
   const copyLabel = new Element({textContent:'Copy link'}), copy = new Element({querySelector:() => copyLabel});
   const referralLink = new Element({value:''}), whatsapp = new Element({href:'#'}), share = new Element({hidden:true}), shareStatus = new Element();
-  const selectors = {'#waitlist-form':form,'#form-status':status,'#success':success,'[data-count]':counter,'#motion-toggle':motion,'#another-signup':another,'#waitlist':waitlist,'.mobile-cta':mobile,'#final-call':new Element(),'#privacy':new Element({open:false}),'#signup-intro':new Element(),'#referral-link':referralLink,'#copy-link':copy,'#share-whatsapp':whatsapp,'#native-share':share,'#share-status':shareStatus,'#referral-note':new Element(),'link[rel="canonical"]':options.noCanonical ? null : new Element({href:SITE.domain + '/'})};
+  const selectors = {'#waitlist-form':form,'#form-status':status,'#success':success,'#motion-toggle':motion,'#another-signup':another,'#waitlist':waitlist,'.mobile-cta':mobile,'#final-call':new Element(),'#privacy':new Element({open:false}),'#signup-intro':new Element(),'#referral-link':referralLink,'#copy-link':copy,'#share-whatsapp':whatsapp,'#native-share':share,'#share-status':shareStatus,'#referral-note':new Element(),'link[rel="canonical"]':options.noCanonical ? null : new Element({href:SITE.domain + '/'})};
   const globalHandlers = {}, timers = new Map(), observations = [], requests = [], clipboardWrites = [], shares = [];
   let nextTimer = 0, nextCode = 0, mode = 'success', finish, registeredTool;
   class MockData extends Map {constructor(){super([...Object.entries(form.elements).map(([key, value]) => [key,value.value]),['access_key',SITE.formAccessKey]]);}}
@@ -148,12 +169,12 @@ function createHarness(SITE, REGISTERED_USERS, options = {}) {
   };
   context.window=context;
   vm.runInNewContext(js,context,{filename:'app.js'});
-  return {form,button,defaultLabel,status,success,counter,signupLinks,motion,another,waitlist,mobile,privacyLink,selectors,body,requests,timers,observations,globalHandlers,referralLink,copy,copyLabel,whatsapp,share,shareStatus,clipboardWrites,shares,get registeredTool(){return registeredTool;},setMode:value => {mode=value;},finish:() => finish(),submit:() => form.dispatch('submit'),expire:() => [...timers.values()].forEach(callback => callback())};
+  return {form,button,defaultLabel,status,success,signupLinks,motion,another,waitlist,mobile,privacyLink,selectors,body,requests,timers,observations,globalHandlers,referralLink,copy,copyLabel,whatsapp,share,shareStatus,clipboardWrites,shares,get registeredTool(){return registeredTool;},setMode:value => {mode=value;},finish:() => finish(),submit:() => form.dispatch('submit'),expire:() => [...timers.values()].forEach(callback => callback())};
 }
 
-async function verifyBehavior(SITE, REGISTERED_USERS) {
+async function verifyBehavior(SITE) {
   const incoming='friend_invite_0123456789';
-  const app=createHarness(SITE,REGISTERED_USERS,{search:`?ref=${incoming}&unrelated=discarded`}), {form,button,status,success,counter}=app;
+  const app=createHarness(SITE,{search:`?ref=${incoming}&unrelated=discarded`}), {form,button,status,success}=app;
   assert(Number(form.elements.form_loaded_at.value)>0);assert.equal(form.elements.interest.value,'both');
   const ownCode=form.elements.referral_code.value;
   assert.match(ownCode,/^[a-f0-9]{32}$/);assert.equal(form.elements.referred_by.value,incoming);
@@ -180,16 +201,16 @@ async function verifyBehavior(SITE, REGISTERED_USERS) {
     assert.equal(form.elements.referral_code.value,ownCode,`${mode}: retries retain attribution`);
     assert(!app.selectors['#signup-intro'].hidden,`${mode}: form introduction remains available`);
     assert(status.textContent.length>0,`${mode}: explain failure`);if(mode === 'rate') assert(status.textContent.includes('wait a minute'));
-    assert(!button.disabled,`${mode}: permit retry`);assert.equal(button.firstElementChild.textContent,app.defaultLabel);
+    assert(!button.disabled,`${mode}: permit retry`);assert(!form.elements.email.readOnly,`${mode}: email can be corrected before retry`);assert.equal(button.firstElementChild.textContent,app.defaultLabel);
     assert.equal(form.getAttribute('aria-busy'),null);assert.equal(app.timers.size,0,`${mode}: clear timer`);
     form.dispatch('input');assert.equal(status.textContent,'','Editing clears stale errors');
   }
   app.setMode('timeout');const timedOut=app.submit();app.expire();await timedOut;
-  assert(!form.hidden && success.hidden);assert(status.textContent.includes('in time'));assert(!button.disabled);
+  assert(!form.hidden && success.hidden);assert(status.textContent.includes('in time'));assert(!button.disabled);assert(!form.elements.email.readOnly,'Timeout restores email editing');
   app.setMode('pending');form.elements.email.value='  student@example.com  ';form.elements.interest.value='both';const pending=app.submit();
-  assert(button.disabled);assert.equal(form.getAttribute('aria-busy'),'true');const before=app.requests.length;await app.submit();assert.equal(app.requests.length,before,'Prevent duplicates');
+  assert(button.disabled);assert(form.elements.email.readOnly,'Keep the displayed email aligned with the in-flight signup');assert.equal(form.getAttribute('aria-busy'),'true');const before=app.requests.length;await app.submit();assert.equal(app.requests.length,before,'Prevent duplicates');
   assert.throws(() => app.registeredTool.execute({interest:'offer'}),/not available/);app.finish();await pending;
-  assert(form.hidden && !success.hidden,'Confirmed response succeeds');assert(success.focused);assert.equal(counter.textContent,String(REGISTERED_USERS),'Count is unchanged by signup');
+  assert(form.hidden && !success.hidden,'Confirmed response succeeds');assert(success.focused);
   assert(app.mobile.hidden, 'Confirmed signup hides the sticky invitation');
   const callsAfterSuccess=app.requests.length;await app.submit();assert.equal(app.requests.length,callsAfterSuccess,'Hidden form cannot resubmit');
   const payload=app.requests.at(-1).body;assert.equal(payload.get('email'),'student@example.com');assert.equal(payload.get('interest'),'both');assert.equal(payload.get('access_key'),SITE.formAccessKey);assert(payload.get('message').includes('launch'));
@@ -200,8 +221,8 @@ async function verifyBehavior(SITE, REGISTERED_USERS) {
   const whatsapp=new URL(app.whatsapp.href);assert.equal(whatsapp.origin,'https://wa.me');assert(whatsapp.searchParams.get('text').includes(invite.href));
   await app.copy.dispatch('click');assert.deepEqual(app.clipboardWrites,[invite.href]);assert.equal(app.copyLabel.textContent,'Copied!');assert(app.shareStatus.textContent.includes('copied'));
   await app.share.dispatch('click');assert.equal(app.shares.length,1);assert.equal(app.shares[0].url,invite.href);
-  assert.equal(app.requests.length,callsAfterSuccess,'Sharing never makes a request or registers a referral');assert.equal(counter.textContent,String(REGISTERED_USERS),'Sharing does not invent momentum');
-  app.another.dispatch('click');assert(!form.hidden && success.hidden);assert.equal(form.elements.email.value,'');assert.equal(form.elements.interest.value,'both');assert(form.elements.email.focused);
+  assert.equal(app.requests.length,callsAfterSuccess,'Sharing never makes a request or registers a referral');
+  app.another.dispatch('click');assert(!form.hidden && success.hidden);assert.equal(form.elements.email.value,'');assert.equal(form.elements.interest.value,'both');assert(form.elements.email.focused);assert(!form.elements.email.readOnly,'Another signup can enter a new email');
   assert.notEqual(form.elements.referral_code.value,ownCode,'A different signup gets a different own code');assert.equal(form.elements.referred_by.value,incoming,'Reset keeps the original invitation');assert(!app.selectors['#signup-intro'].hidden);assert(!app.selectors['#referral-note'].hidden);
   assert(!app.mobile.hidden, 'Reset restores the appropriate invitation state');
   const beforePrepare=app.requests.length;assert(app.registeredTool);const prepared=app.registeredTool.execute({interest:'find',email:'another@example.com'});
@@ -209,31 +230,31 @@ async function verifyBehavior(SITE, REGISTERED_USERS) {
   assert.throws(() => app.registeredTool.execute({interest:'invalid'}),/Invalid/);assert.throws(() => app.registeredTool.execute({interest:'offer',email:123}),/Invalid/);assert.throws(() => app.registeredTool.execute({interest:'offer',unrelated:true}),/Invalid/);
   app.motion.dispatch('click');assert(app.body.classList.contains('motion-paused'));assert.equal(app.motion.getAttribute('aria-pressed'),'true');
   app.motion.dispatch('click');assert(!app.body.classList.contains('motion-paused'));assert.equal(app.motion.getAttribute('aria-pressed'),'false');
-  const reduced=createHarness(SITE,REGISTERED_USERS,{prefersReducedMotion:true});assert(reduced.motion.hidden);assert.equal(reduced.counter.textContent,String(REGISTERED_USERS));
+  const reduced=createHarness(SITE,{prefersReducedMotion:true});assert(reduced.motion.hidden);
 
   for (const invalid of ['', 'short', 'x'.repeat(41), '<script>alert(1)</script>', 'friend@example.com', 'has spaces 123456', 'https://evil.test']) {
-    const rejected=createHarness(SITE,REGISTERED_USERS,{search:`?ref=${encodeURIComponent(invalid)}`});
+    const rejected=createHarness(SITE,{search:`?ref=${encodeURIComponent(invalid)}`});
     assert.equal(rejected.form.elements.referred_by.value,'',`Reject unsafe code ${invalid}`);
     assert(rejected.selectors['#referral-note'].hidden,'Invalid invitation does not show a welcome message');
     await rejected.submit();assert.equal(rejected.requests[0].body.get('referred_by'),'');
   }
   for (const valid of ['a'.repeat(12), 'Z'.repeat(40), 'abc_DEF-0123456']) {
-    const accepted=createHarness(SITE,REGISTERED_USERS,{search:`?ref=${valid}`});assert.equal(accepted.form.elements.referred_by.value,valid);
+    const accepted=createHarness(SITE,{search:`?ref=${valid}`});assert.equal(accepted.form.elements.referred_by.value,valid);
   }
   for (const options of [{noClipboard:true}, {clipboardFailure:true}]) {
-    const fallback=createHarness(SITE,REGISTERED_USERS,options);await fallback.submit();await fallback.copy.dispatch('click');
+    const fallback=createHarness(SITE,options);await fallback.submit();await fallback.copy.dispatch('click');
     assert(fallback.referralLink.focused && fallback.referralLink.selected,'Copy fallback selects the visible link');assert(fallback.shareStatus.textContent.includes('copy'));assert.equal(fallback.copyLabel.textContent,'Copy link','Never falsely report copied');
   }
-  const noShare=createHarness(SITE,REGISTERED_USERS,{noNativeShare:true});await noShare.submit();assert(noShare.share.hidden,'Hide unsupported native share');assert(noShare.whatsapp.href.startsWith('https://wa.me/'));
-  const cancelled=createHarness(SITE,REGISTERED_USERS,{shareError:'AbortError'});await cancelled.submit();await cancelled.share.dispatch('click');assert.equal(cancelled.shareStatus.textContent,'','Cancellation is quiet');
-  const shareError=createHarness(SITE,REGISTERED_USERS,{shareError:'NotAllowedError'});await shareError.submit();await shareError.share.dispatch('click');assert(shareError.shareStatus.textContent.includes('copy'));
-  const noCanonical=createHarness(SITE,REGISTERED_USERS,{noCanonical:true});await noCanonical.submit();assert.equal(new URL(noCanonical.referralLink.value).origin,'https://preview.example.test');
-  const fallbackCrypto=createHarness(SITE,REGISTERED_USERS,{fallbackCrypto:true});assert.match(fallbackCrypto.form.elements.referral_code.value,/^[a-f0-9]{32}$/);
-  const noCrypto=createHarness(SITE,REGISTERED_USERS,{noCrypto:true});await noCrypto.submit();assert(!noCrypto.success.hidden,'Signup can succeed without random-code support');assert.equal(new URL(noCrypto.referralLink.value).search,'');assert(noCrypto.shareStatus.textContent.includes('newer browser'));
+  const noShare=createHarness(SITE,{noNativeShare:true});await noShare.submit();assert(noShare.share.hidden,'Hide unsupported native share');assert(noShare.whatsapp.href.startsWith('https://wa.me/'));
+  const cancelled=createHarness(SITE,{shareError:'AbortError'});await cancelled.submit();await cancelled.share.dispatch('click');assert.equal(cancelled.shareStatus.textContent,'','Cancellation is quiet');
+  const shareError=createHarness(SITE,{shareError:'NotAllowedError'});await shareError.submit();await shareError.share.dispatch('click');assert(shareError.shareStatus.textContent.includes('copy'));
+  const noCanonical=createHarness(SITE,{noCanonical:true});await noCanonical.submit();assert.equal(new URL(noCanonical.referralLink.value).origin,'https://preview.example.test');
+  const fallbackCrypto=createHarness(SITE,{fallbackCrypto:true});assert.match(fallbackCrypto.form.elements.referral_code.value,/^[a-f0-9]{32}$/);
+  const noCrypto=createHarness(SITE,{noCrypto:true});await noCrypto.submit();assert(!noCrypto.success.hidden,'Signup can succeed without random-code support');assert.equal(new URL(noCrypto.referralLink.value).search,'');assert(noCrypto.shareStatus.textContent.includes('newer browser'));
 }
 
 (async() => {
-  const {SITE,REGISTERED_USERS}=await import(pathToFileURL(path.join(__dirname,'config.mjs')).href);
-  verifyOutput(SITE,REGISTERED_USERS);await verifyBehavior(SITE,REGISTERED_USERS);
-  console.log('PASS: SEO, structured data, social images, sitemap, assets, configured count, email-only DOM contract, validation, spam trap, all request errors, timeout, duplicate prevention, confirmed success/reset, referral attribution and sanitization, share URLs, clipboard/native share fallbacks, privacy, motion, and prepare-only signup. Entirely offline; no live submissions sent.');
+  const {SITE}=await import(pathToFileURL(path.join(__dirname,'config.mjs')).href);
+  verifyOutput(SITE);await verifyBehavior(SITE);
+  console.log('PASS: Pakistan SEO, linked structured data, social images, sitemap, assets, email-only accessibility contract, validation, spam trap, all request errors, timeout, pending-email protection, duplicate prevention, confirmed success/reset, referral attribution and sanitization, share URLs, clipboard/native share fallbacks, privacy, motion, and prepare-only signup. Entirely offline; no live submissions sent.');
 })().catch(error => {console.error(error);process.exitCode=1;});

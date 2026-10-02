@@ -5,17 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{TITLE}}</title>
   <meta name="description" content="{{DESCRIPTION}}">
+  <meta name="keywords" content="{{KEYWORDS}}">
   <meta name="robots" content="{{ROBOTS}}">
-  <meta name="theme-color" content="#f7f4ec">
+  <meta name="theme-color" content="#f8f7f2">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="unimarkaz">
-  <meta property="og:title" content="Your campus. Your next big thing. — unimarkaz">
-  <meta property="og:description" content="A place for students in Pakistan to buy, sell and find what they need. Join the list for early access.">
-  <meta name="twitter:title" content="Your campus. Your next big thing. — unimarkaz">
-  <meta name="twitter:description" content="A student marketplace is coming to Pakistan. Sign up to hear when you can join.">
+  <meta property="og:site_name" content="UniMarkaz">
+  <meta property="og:title" content="{{TITLE}}">
+  <meta property="og:description" content="{{DESCRIPTION}}">
+  <meta name="twitter:title" content="{{TITLE}}">
+  <meta name="twitter:description" content="{{DESCRIPTION}}">
   {{CANONICAL}}{{SOCIAL_META}}
   <script type="application/ld+json">{{SCHEMA}}</script>
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/assets/icon-512.png">
   <link rel="preload" href="/assets/space-grotesk.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css">
   <script src="/app.js" defer></script>
@@ -29,20 +35,22 @@
     <symbol id="i-star" viewBox="0 0 40 40"><path d="m20 0 4 12 10-7-5 12 11 3-12 4 7 10-12-5-3 11-4-12-10 7 5-12-11-3 12-4L5 6l12 5Z"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M15 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h3"/></symbol>
     <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M5 13v7h14v-7"/></symbol>
+    <symbol id="i-book" viewBox="0 0 32 32"><path d="M16 8c-4-3-8-4-12-3v21c4-1 8 0 12 3 4-3 8-4 12-3V5c-4-1-8 0-12 3Zm0 0v21M8 11l4 1m-4 5 4 1m8-6 4-1m-4 7 4-1"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 32 32"><path d="m17 3 3 10 9 3-9 3-3 10-3-10-9-3 9-3ZM6 3v5M3.5 5.5h5M27 24v5m-2.5-2.5h5"/></symbol>
+    <symbol id="i-ride" viewBox="0 0 32 32"><path d="m6 12 3-7h14l3 7M4 12h24v13H4Zm3 13v3h4v-3m10 0v3h4v-3M8 18h3m10 0h3M2 11l3 1m22 0 3-1"/></symbol>
   </svg>
-  <header class="site-header wrap">
+<header class="site-header wrap">
     <a class="wordmark" href="#top" aria-label="unimarkaz home"><span class="brand-icon" aria-hidden="true">u<span></span></span>unimarkaz<span class="brand-period">.</span></a>
-    <span class="header-note">MADE FOR STUDENTS IN PAKISTAN.</span>
-    <nav aria-label="Main navigation"><a class="nav-why" href="#why-early">Why join early?</a><a class="nav-cta" href="#waitlist">Get early access <svg class="icon" aria-hidden="true"><use href="#i-up-right"/></svg></a></nav>
+    <nav aria-label="Main navigation"><a class="nav-idea" href="#the-idea">The idea</a><a class="nav-why" href="#why-early">Why join early?</a><a class="nav-cta" href="#waitlist">Get early access <svg class="icon" aria-hidden="true"><use href="#i-up-right"/></svg></a></nav>
   </header>
   <main id="main">
+
     <section class="hero wrap" aria-labelledby="hero-title">
       <div class="hero-copy">
         <p class="eyebrow hero-eyebrow"><span class="status-dot" aria-hidden="true"></span> PAKISTAN’S STUDENT MARKETPLACE</p>
-        <h1 id="hero-title">Your campus.<br>Your next<br><em>big thing.</em><svg class="headline-spark" viewBox="0 0 58 62" aria-hidden="true"><path d="m9 33 13-3M28 19l5-15M39 29l15-9M40 40l14 4"/></svg></h1>
-        <p class="hero-description">Buy, sell and find what you need on campus.<br>A place made for students. <strong>Coming soon.</strong></p>
+        <h1 id="hero-title">Your campus.<br>Your next<br><em>big thing.<svg class="headline-spark" viewBox="0 0 58 62" aria-hidden="true"><path d="m9 33 13-3M28 19l5-15M39 29l15-9M40 40l14 4"/></svg></em></h1>
+        <p class="hero-description">Buy and sell second-hand textbooks, offer your skills, and share campus rides &mdash; one student marketplace for all of Pakistan.<br><strong>Lahore, Karachi, Islamabad, Peshawar and beyond &mdash; your campus, your marketplace.</strong></p>
         <div class="signup" id="waitlist">
-          <p class="signup-intro" id="signup-intro">Sign up to hear when you can join.</p>
           <p id="referral-note" class="referral-note" hidden>A friend invited you. Enter your email to join the list.</p>
           <form id="waitlist-form" action="{{ENDPOINT}}" method="post">
             <input type="hidden" name="access_key" value="{{FORM_KEY}}">
@@ -53,9 +61,9 @@
             <input type="hidden" name="referred_by" value="">
             <input class="honeypot" type="text" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true">
             <label class="sr-only" for="email">Your email address</label>
-            <div class="email-row"><input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="Your email address" required maxlength="254" aria-describedby="signup-note"><button class="button submit" type="submit"><span>Join the list</span><svg class="icon" aria-hidden="true"><use href="#i-up-right"/></svg></button></div>
+            <div class="email-row"><input id="email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" placeholder="Your email address" required maxlength="254" aria-describedby="signup-note form-status"><button class="button submit" type="submit"><span>Count me in</span><svg class="icon" aria-hidden="true"><use href="#i-up-right"/></svg></button></div>
             <p id="form-status" role="status" aria-live="polite" tabindex="-1"></p>
-            <p class="signup-note" id="signup-note"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> Free to join. We’ll email you when it’s ready.</p>
+            <p class="signup-note" id="signup-note"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> Free to join. Just your email. You'll hear it first.</p>
             <noscript><p class="signup-note">You can still sign up. Your details will be sent to our signup service.</p></noscript>
           </form>
           <div id="success" class="success" hidden tabindex="-1" role="region" aria-labelledby="success-title">
@@ -68,33 +76,53 @@
             <button id="another-signup" class="text-button" type="button">Use another email</button>
           </div>
         </div>
-        <div class="social-proof"><div class="proof-avatars" aria-hidden="true"><span class="avatar avatar-one">☺</span><span class="avatar avatar-two">✳</span><span class="avatar avatar-three">ツ</span><span class="avatar avatar-four">↗</span></div><p><strong><span data-count="{{COUNT}}">{{COUNT}}</span> students</strong> have already signed up.<br><span>Join students from across Pakistan.</span></p></div>
+
       </div>
-      <div class="campus-board" role="img" aria-label="A campus noticeboard collage: an early access student pass, a handwritten note saying big plans, student budget, a chai cup, and an early signup sticker.">
+      <div class="campus-board" role="img" aria-label="A campus noticeboard with an illustration of students spending time together, a blue early access pass and a note: big plans, student budget.">
         <div class="board-grid"></div>
-        <span class="board-label">COMING SOON TO CAMPUS</span>
-        <div class="scribble-note"><span class="tape"></span><span class="handwriting">big plans.<br>student budget.</span><svg viewBox="0 0 130 28"><path d="M4 18Q45 2 125 10M14 25Q57 14 115 17"/></svg><span class="note-caption">made for student life.</span></div>
+        <span class="board-label">A LITTLE PREVIEW OF WHAT’S NEXT</span>
+        <div class="campus-photo"><span class="photo-tape"></span><img src="/assets/campus.webp" alt="" width="720" height="540" fetchpriority="high"><div class="photo-caption"><span>better with your people.</span><span aria-hidden="true">♡</span></div></div>
+        <div class="scribble-note"><span class="tape"></span><span class="handwriting">big plans.<br>student budget.</span><svg viewBox="0 0 130 28"><path d="M4 18Q45 2 125 10M14 25Q57 14 115 17"/></svg><span class="note-caption">we get it. :)</span></div>
         <div class="access-pass">
-          <div class="pass-top"><span><span class="tiny-star">✳</span> unimarkaz</span><span>STUDENT PASS</span></div>
-          <div class="pass-body"><span class="pass-kicker">BE ONE OF THE FIRST TO JOIN.</span><strong>THE<br>CAMPUS<br>IS YOURS<span>.</span></strong><div class="pass-circle"><span>JOIN<br>EARLY<br><b>↗</b></span></div></div>
+          <div class="pass-top"><span><span class="tiny-star">✳</span> unimarkaz</span><span>EARLY ACCESS</span></div>
+          <div class="pass-body"><span class="pass-kicker">YOUR NEXT CHAPTER STARTS HERE.</span><strong>GOOD<br>THINGS<br>ARE COMING<span>↗</span></strong></div>
           <div class="pass-tear"></div>
-          <div class="pass-bottom"><div><span>YOUR INVITE</span><strong>YOU + YOUR BIG PLANS</strong></div><div class="barcode"></div><span class="pass-number">UM / 001</span></div>
+          <div class="pass-bottom"><div><span>RESERVED FOR</span><strong>YOU + YOUR BIG PLANS</strong></div><div class="barcode"></div></div>
         </div>
-        <div class="og-sticker"><svg viewBox="0 0 120 120"><path d="m60 2 10 9 13-3 7 12 13 3 2 14 11 8-5 13 5 13-11 8-2 14-13 3-7 12-13-3-10 9-10-9-13 3-7-12-13-3-2-14L4 71l5-13-5-13 11-8 2-14 13-3 7-12 13 3Z"/></svg><span>YOU’RE<br><strong>IN</strong><br>EARLY</span></div>
+        <div class="og-sticker"><svg viewBox="0 0 120 120"><path d="m60 2 10 9 13-3 7 12 13 3 2 14 11 8-5 13 5 13-11 8-2 14-13 3-7 12-13-3-10 9-10-9-13 3-7-12-13-3-2-14L4 71l5-13-5-13 11-8 2-14 13-3 7-12 13 3Z"/></svg><span>YOUR PEOPLE.<br><strong>☺</strong><br>YOUR PLACE.</span></div>
         <svg class="chai-doodle" viewBox="0 0 170 180"><g fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M48 38q-10-13 2-24M74 36q13-13 0-28M97 39q-8-9 0-18M26 61q53-20 105 0l-12 59q-35 23-80 0Z"/><ellipse cx="78" cy="61" rx="52" ry="12"/><path d="M132 68q36-6 23 26-8 13-30 12M22 133q56 26 115 0M37 143q40 18 87 0M60 91q5 9 10 0M92 91q5 9 10 0M73 104q6 6 13 0"/></g><text x="28" y="174" fill="currentColor" font-size="16" font-family="Georgia,serif" font-style="italic">time for chai.</text></svg>
         <div class="launch-sticker"><span class="status-dot"></span> LAUNCHING SOON <svg class="icon"><use href="#i-up-right"/></svg></div>
         <svg class="board-arrow" viewBox="0 0 160 90"><path d="M149 10c-4 60-80 73-130 40m8 24L15 47l30-4"/></svg>
-        <span class="board-footer">A NEW PLACE FOR STUDENTS TO CONNECT.</span>
+        <span class="board-footer">LESS SEARCHING. MORE STUDENT LIFE.</span>
         <svg class="board-star" aria-hidden="true"><use href="#i-star"/></svg>
       </div>
     </section>
-    <div class="campus-ribbon" aria-label="Built for students, from Lahore to Karachi and every campus in between"><div class="ribbon-inner"><span>MADE FOR STUDENT LIFE</span><span aria-hidden="true">✳</span><span>LAHORE TO KARACHI</span><span aria-hidden="true">✳</span><span>AND YOUR CAMPUS, TOO</span><span aria-hidden="true">✳</span><span>BIG PLANS. SMALL BUDGETS.</span><span aria-hidden="true">✳</span><span>MADE FOR STUDENT LIFE</span><span aria-hidden="true">✳</span></div></div>
+    <div class="campus-ribbon"><div class="ribbon-inner wrap"><span>MADE FOR STUDENT LIFE</span><span aria-hidden="true">✳</span><span>BIG PLANS. SMALL BUDGETS.</span><span aria-hidden="true">✳</span><span>FROM CAMPUS. FOR CAMPUS.</span><span aria-hidden="true">✳</span><span>A LITTLE MORE POSSIBLE.</span></div></div>
     <section class="teaser wrap" id="the-idea" aria-labelledby="teaser-title">
-      <div class="section-index"><span>01 / THE IDEA</span><svg class="icon" aria-hidden="true"><use href="#i-up-right"/></svg></div>
-      <div class="teaser-content"><h2 id="teaser-title">Someone on campus has<br><em>just what you need.</em></h2><div class="teaser-bottom"><p>Find things you need. Offer what you have.<br>Connect with students around you.<br>We’ll share more when we launch.</p><span class="handwritten-aside">find what you need.<br>right on campus.<svg viewBox="0 0 95 45" aria-hidden="true"><path d="M5 7q18 35 77 20m-10-9 15 8-10 13"/></svg></span></div></div>
+      <div class="section-index"><span>01 / THE IDEA</span><span>FAMILIAR NEEDS. NEW POSSIBILITIES.</span></div>
+      <div class="teaser-heading"><h2 id="teaser-title">Someone on campus has<br><em>just what you need.</em></h2><p>And you might have what they’re looking for.<br>We’re bringing it all a little closer.</p></div>
+      <div class="possibilities">
+        <article class="possibility books"><div class="possibility-top"><svg class="idea-icon" aria-hidden="true"><use href="#i-book"/></svg><span>FOR YOUR NEXT SEMESTER</span></div><h3>Pre-loved books.<br>New beginnings.</h3><p>Your next good find could be another student’s last semester.</p><span class="card-aside">a little saved goes a long way.</span></article>
+        <article class="possibility skills"><div class="possibility-top"><svg class="idea-icon" aria-hidden="true"><use href="#i-spark"/></svg><span>FOR YOUR BIG IDEAS</span></div><h3>Your skills.<br>Someone’s missing piece.</h3><p>That thing you’re good at? Someone on campus could use it.</p><span class="card-aside">yes, that counts as a skill.</span></article>
+        <article class="possibility rides"><div class="possibility-top"><svg class="idea-icon" aria-hidden="true"><use href="#i-ride"/></svg><span>FOR THE EVERYDAY</span></div><h3>Same direction.<br>Better company.</h3><p>A ride to campus. An everyday find. A connection worth making.</p><span class="card-aside">student life, a little easier.</span></article>
+      </div>
+      <p class="teaser-note">Just a glimpse. <strong>The good part is still to come.</strong> <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg></p>
+      <!-- University & city coverage — crawlable context for search engines -->
+      <p class="campus-coverage-label">Joining students from universities across Pakistan</p>
+      <ul class="campus-coverage-list" aria-label="Universities and cities covered">
+        <li><strong>Lahore:</strong> LUMS, UET Lahore, FAST-NUCES Lahore, COMSATS Lahore, GCU Lahore, Forman Christian College, University of the Punjab, Lahore University of Management Sciences</li>
+        <li><strong>Karachi:</strong> IBA Karachi, NED University, FAST-NUCES Karachi, SZABIST Karachi, Aga Khan University, University of Karachi, Bahria University Karachi, Indus Valley School</li>
+        <li><strong>Islamabad / Rawalpindi:</strong> NUST, COMSATS Islamabad, IIUI (International Islamic University), Quaid-i-Azam University, Air University, Bahria University Islamabad, SZABIST Islamabad</li>
+        <li><strong>Peshawar:</strong> University of Peshawar, CECOS University, Ghulam Ishaq Khan Institute (GIK), City University Peshawar, Sarhad University</li>
+        <li><strong>Faisalabad:</strong> University of Agriculture Faisalabad (UAF), GC University Faisalabad, COMSATS Faisalabad, National Textile University</li>
+        <li><strong>Multan:</strong> Bahauddin Zakariya University (BZU), MNS University of Agriculture, Muhammad Nawaz Sharif University</li>
+        <li><strong>Hyderabad:</strong> MUET (Mehran University), University of Sindh, Liaquat University</li>
+        <li><strong>Quetta:</strong> University of Balochistan, BUITEMS, Balochistan University of IT</li>
+        <li><strong>Other cities:</strong> Abbottabad (AWKUM, COMSATS), Gujranwala, Sialkot, Bahawalpur, Sukkur (SUIT), Mirpur (AJK University), Sargodha University, Hazara University</li>
+      </ul>
     </section>
     <section class="perks wrap" id="why-early" aria-labelledby="perks-title">
-      <div class="perks-heading"><div><p class="eyebrow">JOIN BEFORE WE LAUNCH</p><h2 id="perks-title">Why join <em>early?</em></h2></div><span class="perks-note">Here’s what you get when you sign up.</span></div>
+      <div class="perks-heading"><div><p class="eyebrow">02 / THE EARLY CREW</p><h2 id="perks-title">A little early.<br><em>A little ahead.</em></h2></div><p class="perks-note">The best part of finding something good?<br>Being there from the start.</p></div>
       <div class="perks-grid">
         <article class="perk"><div class="perk-top"><span class="perk-number">01</span><svg class="perk-doodle door-doodle" viewBox="0 0 80 76" aria-hidden="true"><path d="M18 65V12h44v53M18 12 47 5v60H18M39 36v8M5 65h68M57 36h19m-7-7 7 7-7 7"/></svg></div><h3>Get early access.</h3><p>Sign up now to get an invite before we open to everyone. We’ll email you when you can join.</p><span class="perk-tag">EARLY ACCESS</span></article>
         <article class="perk"><div class="perk-top"><span class="perk-number">02</span><svg class="perk-doodle badge-doodle" viewBox="0 0 80 76" aria-hidden="true"><path d="m40 4 8 7 11-1 3 11 9 6-4 11 1 11-11 3-7 9-10-4-10 4-7-9-11-3 1-11-4-11 9-6 3-11 11 1ZM24 53l-5 20 13-5 7 6 5-16m9-3 8 18-12-3"/><path d="m40 17 4 10 11 1-9 7 3 11-9-6-9 6 3-11-9-7 11-1Z"/></svg></div><h3>An early member badge.</h3><p>Get a badge when we launch to show you were one of the first students to sign up.</p><span class="perk-tag">EARLY MEMBER BADGE</span></article>
@@ -102,12 +130,13 @@
       </div>
       <p class="perks-footnote">Sign up with your email. Invite friends to move up the list.</p>
     </section>
-    <section class="final-call wrap" id="final-call" aria-labelledby="final-title"><div class="final-panel"><span class="final-topline">YOU’RE INVITED TO JOIN US.</span><div class="final-main"><div><h2 id="final-title">Be first to<br><em>hear what’s next.</em> Join us.</h2><p>Leave your email. We’ll let you know when you can join.</p><a class="button cream-button" href="#waitlist">Join the list — it’s free <svg class="icon" aria-hidden="true"><use href="#i-up-right"/></svg></a></div><div class="final-stamp" aria-hidden="true"><span>JOIN EARLY</span><svg viewBox="0 0 100 75"><path d="M28 17v12m43-12v12M18 44q33 36 65-2"/></svg><span>IT’S FREE</span></div></div><div class="final-bottom"><span>MADE FOR STUDENTS. COMING SOON.</span><span>SEE YOU SOON ↗</span></div></div></section>
-    <section class="faq wrap" aria-labelledby="faq-title"><div class="faq-heading"><p class="eyebrow">HAVE A QUESTION?</p><h2 id="faq-title">Common questions.</h2><p>Here’s what you need to know.</p></div><div class="faq-list">
-      <details><summary>What is unimarkaz?<span aria-hidden="true">+</span></summary><p>unimarkaz is a place for students in Pakistan to buy, sell and find what they need from other students. We’re getting ready to launch and will share more details soon.</p></details>
-      <details><summary>Can students from my university join?<span aria-hidden="true">+</span></summary><p>Yes. University and college students anywhere in Pakistan can sign up. We’ll let you know which campuses can use unimarkaz as we launch.</p></details>
+    <section class="final-call wrap" id="final-call" aria-labelledby="final-title"><div class="final-panel"><span class="final-topline"><span class="status-dot" aria-hidden="true"></span> SOMETHING GOOD IS COMING TO CAMPUS.</span><div class="final-main"><div><h2 id="final-title">Your next good thing.<br><em>Be there for it.</em></h2><p>One email. A place on the list. A whole lot to look forward to.</p><a class="button cream-button" href="#waitlist">Count me in — it’s free <svg class="icon" aria-hidden="true"><use href="#i-up-right"/></svg></a></div><div class="final-stamp" aria-hidden="true"><span>SEE YOU</span><svg viewBox="0 0 100 75"><path d="M28 17v12m43-12v12M18 44q33 36 65-2"/></svg><span>ON CAMPUS</span></div></div><div class="final-bottom"><span>YOUR CAMPUS. YOUR PEOPLE. YOUR UNIMARKAZ.</span><span>PAKISTAN, THIS ONE’S FOR YOU ↗</span></div></div></section>
+    <section class="faq wrap" aria-labelledby="faq-title"><div class="faq-heading"><p class="eyebrow">03 / GOOD TO KNOW</p><h2 id="faq-title">A few things<br>you might <em>ask.</em></h2><p>Keeping it simple. Just like signing up.</p></div><div class="faq-list">
+      <details><summary>What is unimarkaz?<span aria-hidden="true">+</span></summary><p>UniMarkaz is an upcoming student marketplace in Pakistan. It’s a place to buy and sell books and everyday products, offer your skills, and find shared rides with other students. We’re bringing students from different campuses together. More on that when we launch.</p></details>
+      <details><summary>Can students from my university join?<span aria-hidden="true">+</span></summary><p>Yes! University and college students across Pakistan can join the list, from Lahore, Karachi and Islamabad to Rawalpindi, Peshawar, Faisalabad and beyond. We’ll let you know when unimarkaz is ready for your campus.</p></details>
+      <details><summary>Is it free to join the list?<span aria-hidden="true">+</span></summary><p>Completely free. All you need is your email. No password, student ID or payment details required to get early access to Pakistan&rsquo;s student marketplace.</p></details>
       <details><summary>When will unimarkaz launch?<span aria-hidden="true">+</span></summary><p>We’re launching soon, but haven’t set a date yet. Students on the list will get invites before we open to everyone. Sign up and we’ll email you when you can join.</p></details>
-      <details><summary>How do I move up the list?<span aria-hidden="true">+</span></summary><p>Sign up, then share your invite link. Each new friend who signs up through it can help you get an earlier invite. We check signups before sending invites and count each person’s email only once. Sharing a link without new signups won’t move you up. Your position on the list isn’t shown here.</p></details>
+      <details><summary>How do I get into the top 50?<span aria-hidden="true">+</span></summary><p>We’re accepting only the top 50 on the list for our first early-access group. Sign up, then share your invite link. More friends who sign up through it means a higher place; if two people have the same number of invites, the earlier signup comes first. We review signups and count each email only once. The registered user count shows the total on the list, not your personal position. Everyone else stays on the list for future invites.</p></details>
       <details id="privacy"><summary>What happens to my email?<span aria-hidden="true">+</span></summary><p>We use your email to send you an invite and news about the launch. SplitForms, our signup service, receives your email and invite code. If a friend invited you, we also send their code to count the invite. We don’t save your email in this browser or track you for ads. Reply to any update to leave the list.</p></details>
     </div></section>
   </main>
