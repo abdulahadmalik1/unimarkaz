@@ -1,7 +1,7 @@
 export const SITE = {
   // Set to your final HTTPS origin (no trailing slash), then run `node build.mjs`.
   // Empty keeps previews out of search results and omits placeholder canonical URLs.
-  domain: 'https://unimarkaz.com',
+  domain: 'https://www.unimarkaz.com',
   // Subpage path for the waitlist — main domain homepage stays separate.
   subPath: '/early-access',
   title: 'UniMarkaz — Pakistan\'s Student Marketplace | Buy, Sell, Skills & Campus Rides',
