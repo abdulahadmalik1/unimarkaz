@@ -12,8 +12,13 @@
       "permanent": true
     },
     {
+      "source": "/",
+      "destination": "/early-access/",
+      "permanent": false
+    },
+    {
       "source": "/index.html",
-      "destination": "/",
+      "destination": "/early-access/",
       "permanent": true
     },
     {
