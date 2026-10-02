@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-<defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="#d8d7cc" stroke-width="1"/></pattern><pattern id="barcode" width="15" height="40" patternUnits="userSpaceOnUse"><path d="M0 0v40m5-40v40m8-40v40m5-40v40" stroke="#f7f4ec" stroke-width="2"/></pattern></defs>
+<defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="#d8d7cc" stroke-width="1"/></pattern><pattern id="barcode" width="15" height="40" patternUnits="userSpaceOnUse"><path d="M0 0v40m5-40v40m8-40v40m5-40v40" stroke="#f7f4ec" stroke-width="2"/></pattern></defs><style>[fill="#ec482e"]{fill:#315cff}[stroke="#ec482e"]{stroke:#315cff}</style>
 <rect width="1200" height="630" fill="#f7f4ec"/>
 <rect x="690" y="65" width="450" height="480" fill="url(#grid)"/>
 <g transform="translate(55 40)"><rect width="33" height="36" rx="7" fill="#ec482e"/><path d="M8 9v14q0 9 9 9t9-9v-9h-7v9q0 3-2 3t-2-3V9Z" fill="#f7f4ec"/><path d="M19 6h7v5h-7Z" fill="#efdc7c"/><text x="43" y="28" font-family="Arial,sans-serif" font-size="32" font-weight="700" letter-spacing="-1.8" fill="#242922">unimarkaz<tspan fill="#ec482e">.</tspan></text></g>

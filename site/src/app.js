@@ -53,11 +53,11 @@ function revealShareOptions() {
   if (copyLink) copyLink.querySelector('span').textContent = 'Copy link';
   if (shareStatus) shareStatus.textContent = '';
   if (shareWhatsapp) {
-    shareWhatsapp.href = `https://wa.me/?text=${encodeURIComponent(`Your campus group needs this. 👀 unimarkaz is a student marketplace launching soon. Get on the list: ${confirmedShareUrl}`)}`;
+    shareWhatsapp.href = `https://wa.me/?text=${encodeURIComponent(`unimarkaz is a place for students to buy, sell and find what they need. It’s launching soon. Join the list: ${confirmedShareUrl}`)}`;
   }
   if (nativeShare) nativeShare.hidden = typeof navigator.share !== 'function';
   if (shareStatus && !referralCode) {
-    shareStatus.textContent = 'Share this page with your campus group. Personal invite links need a newer browser.';
+    shareStatus.textContent = 'You can share this page. To get your own invite link, sign up using a newer browser.';
   }
 }
 
@@ -67,7 +67,7 @@ copyLink?.addEventListener('click', async () => {
     if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
     await navigator.clipboard.writeText(confirmedShareUrl);
     copyLink.querySelector('span').textContent = 'Copied!';
-    if (shareStatus) shareStatus.textContent = 'Link copied. Your campus group is waiting.';
+    if (shareStatus) shareStatus.textContent = 'Link copied. Share it with your friends.';
   } catch {
     referralLink?.focus();
     referralLink?.select();
@@ -80,8 +80,8 @@ nativeShare?.addEventListener('click', async () => {
   if (shareStatus) shareStatus.textContent = '';
   try {
     await navigator.share({
-      title: 'unimarkaz — your campus is about to get interesting',
-      text: 'A student marketplace is coming. Get on the list with me. 👀',
+      title: 'unimarkaz — a marketplace for students',
+      text: 'A place for students to buy, sell and find what they need is coming soon. Join the list with me.',
       url: confirmedShareUrl
     });
   } catch (error) {
@@ -210,10 +210,10 @@ form.addEventListener('submit', async event => {
     // No signup details or referral codes are stored in this browser.
   } catch (error) {
     status.textContent = error.name === 'AbortError'
-      ? 'We couldn’t confirm your signup in time. Your email is still here — please try again shortly.'
+      ? 'We couldn’t confirm your signup in time. Please try again. You don’t need to re-enter your email.'
       : error.rateLimited
-        ? 'Please wait a minute, then try again. Your email is still here.'
-        : 'We couldn’t confirm your signup. Your email is still here — please try again.';
+        ? 'Please wait a minute, then try again. You don’t need to re-enter your email.'
+        : 'We couldn’t confirm your signup. Please try again. You don’t need to re-enter your email.';
     status.focus({preventScroll: true});
   } finally {
     clearTimeout(timeout);

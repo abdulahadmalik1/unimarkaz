@@ -7,7 +7,7 @@ export const SITE = {
   // Empty keeps previews out of search results and omits placeholder canonical URLs.
   domain: 'https://unimarkaz.com',
   title: 'unimarkaz — Your Campus. Your Next Big Thing.',
-  description: 'Something good is changing hands. A new student marketplace is coming to Pakistan. Join the unimarkaz early crew for first access and bring your friends.',
+  description: 'A place for students in Pakistan to buy, sell and find what they need. Sign up for free to get an invite before unimarkaz opens to everyone.',
   formEndpoint: 'https://splitforms.com/api/submit',
   // Public form access key, NOT a private SplitForms account API token.
   formAccessKey: '595c0ba446d040d2918c813f7505407d',
