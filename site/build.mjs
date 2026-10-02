@@ -101,6 +101,7 @@ if (subPath) {
 // Source assets live outside generated output so a clean checkout builds completely.
 cpSync(path.join(root, 'assets'), path.join(dist, 'assets'), { recursive: true });
 writeFileSync(path.join(dist, 'robots.txt'), `User-agent: *\nAllow: /\n${isIndexable ? `\nSitemap: ${SITE.domain}/sitemap.xml\n` : ''}`);
-// Sitemap includes the canonical subpage URL.
-writeFileSync(path.join(dist, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${isIndexable ? `\n  <url><loc>${escape(SITE.domain)}/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>\n  <url><loc>${escape(canonicalUrl)}</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>\n` : ''}</urlset>\n`);
+// Sitemap: only list the real canonical page — NOT the root (which is a 302 redirect).
+// Including a redirecting URL in the sitemap can confuse Google's canonicalization.
+writeFileSync(path.join(dist, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${isIndexable ? `\n  <url><loc>${escape(canonicalUrl)}</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>\n` : ''}</urlset>\n`);
 console.log(`Built UniMarkaz in ${subDir}. Search indexing: ${isIndexable ? 'enabled for production' : 'disabled for this preview'}.`);
